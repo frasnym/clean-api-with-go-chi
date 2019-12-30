@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"api-clean/features/todo"
-
+	"api-clean/internal/config"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 )
 
-func Routes() *chi.Mux {
+func Routes(configuration *config.Config) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
@@ -22,14 +22,18 @@ func Routes() *chi.Mux {
 	)
 
 	router.Route("/v1", func(r chi.Router) {
-		r.Mount("/api/todo", todo.Routes())
+		r.Mount("/api/todo", todo.Routes(configuration))
 	})
 
 	return router
 }
 
 func main() {
-	router := Routes()
+	configuration, err := config.New()
+	if err != nil {
+		log.Panicln("Configuration error", err)
+	}
+	router := Routes(configuration)
 
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
 		log.Printf("%s %s\n", method, route) // Walk and print out all routes
@@ -39,5 +43,6 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
+	log.Println("Serving application at PORT :" + configuration.Constants.PORT)
+	log.Fatal(http.ListenAndServe(":"+configuration.Constants.PORT, router)) // Note, the port is usually gotten from the environment.
 }
