@@ -54,7 +54,7 @@ func CreateTodo(configuration *config.Config) http.HandlerFunc {
 
 func GetAllTodos(configuration *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		row := configuration.Database.QueryRow("SELECT mbr_name FROM mbr_list WHERE mbr_code = 'EKL0000520';")
+		row := configuration.Database.QueryRow("SELECT country_name FROM country WHERE id_country = 96;")
 		var tempString string
 		err := row.Scan(&tempString)
 		if err != nil {
